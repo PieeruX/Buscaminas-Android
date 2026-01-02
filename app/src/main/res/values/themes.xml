@@ -1,0 +1,22 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.ProyectoBuscaMinas" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <style name="Theme.Splash" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Oculta la barra de estado y navegación si quieres pantalla completa -->
+        <item name="android:windowFullscreen">true</item>
+
+
+        <!-- 2. Hace el icono del sistema TRANSPARENTE (invisible) -->
+        <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
+
+        <!-- 3. (Opcional) Asegura que no haya duración extra -->
+        <item name="android:windowSplashScreenAnimationDuration">0</item>
+
+    </style>
+
+    <style name="Theme.ProyectoBuscaMinas" parent="Base.Theme.ProyectoBuscaMinas" />
+</resources>
