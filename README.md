@@ -9,6 +9,17 @@ Un clon moderno y completo del clásico juego **Buscaminas (Minesweeper)** desar
   <img src="https://img.shields.io/badge/IDE-Android%20Studio-purple?logo=android-studio" alt="Android Studio" />
 </p>
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/aca94cfc-6421-4b06-8eef-8812a7b4a69b" height="300" />
+  <img src="https://github.com/user-attachments/assets/aad83f1f-71f2-4293-b490-897861f132b7" height="300" />
+  <img src="https://github.com/user-attachments/assets/073f9442-81eb-4157-b414-b0ced1ec0cdf" height="300" />
+  <img src="https://github.com/user-attachments/assets/9f813017-0bf0-46eb-8a8e-63f3296cae35" height="300" />
+  <img src="https://github.com/user-attachments/assets/883c53be-db3d-4720-b19b-b88fd2006c9f" height="300" />
+  <img src="https://github.com/user-attachments/assets/b8c81ff3-ff47-4550-a75d-156e302e6241" height="300" />
+  <img src="https://github.com/user-attachments/assets/295ab74a-0fe1-464b-bd7a-719e46c90d03" height="300" />
+
+</p>
+
 ## ✨ Características Principales
 
 *   **🎮 Jugabilidad Clásica:** Algoritmo recursivo para abrir huecos vacíos automáticamente.
@@ -45,7 +56,7 @@ Un clon moderno y completo del clásico juego **Buscaminas (Minesweeper)** desar
 ## 🚀 Instalación y Uso
 
 1.  Clona este repositorio:
-2.  ```    git clone https://github.com/TU_USUARIO/Buscaminas-Android.git ```
+2.  `git clone https://github.com/TU_USUARIO/Buscaminas-Android.git `
 3.  Abre el proyecto en Android Studio.
 4.  Deja que Gradle sincronice las dependencias.
 5.  Ejecuta la app en un emulador o dispositivo físico (Android 7.0+ recomendado).
