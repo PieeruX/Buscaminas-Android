@@ -87,7 +87,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-
+    <ImageView
+        android:id="@+id/ivSonido"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:srcCompat="@drawable/sonido"
+        android:layout_marginBottom="180dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/tgDificultad"
+        />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

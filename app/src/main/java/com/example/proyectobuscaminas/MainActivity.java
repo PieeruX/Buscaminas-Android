@@ -1,13 +1,20 @@
 package com.example.proyectobuscaminas;
 
 
+
+import static java.lang.Thread.sleep;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.media.AudioAttributes;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -32,7 +39,9 @@ import com.airbnb.lottie.LottieAnimationView;
 
 public class MainActivity  extends AppCompatActivity implements View.OnTouchListener {
     private Tablero fondo;
-    private int corX, corY, numBombas, numBanderitas, fondoRandom, contadorCasillas, numFondo = 0;
+    private MediaPlayer mpMusica;
+    private int corX, corY, numBombas, numBanderitas, fondoRandom, contadorCasillas,
+            numFondo = 0, sonidoCasilla, sonidoBanderita, sonidoVictoria, sonidoPerder, sonidoGameOver, sonidoFallo, soniCarita;
     private ImageView imagenFondo;
     private LinearLayout layout;
     private boolean juegoActivo;
@@ -42,6 +51,7 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
     private Chronometer cronometro;
     private LottieAnimationView animacionConfeti, winnerAnimacion, perdedorAnimacion;
     private GestureDetector gestureDetector;
+    private SoundPool soundPool;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +63,23 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_GAME)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+
+        soundPool = new SoundPool.Builder().setMaxStreams(5)
+                .setAudioAttributes(audioAttributes)
+                .build();
+
+        sonidoCasilla = soundPool.load(this, R.raw.destaparcasilla, 1);
+        sonidoBanderita = soundPool.load(this, R.raw.casilla, 1);
+        sonidoPerder = soundPool.load(this, R.raw.perder, 1);
+        sonidoVictoria = soundPool.load(this, R.raw.victoria, 1);
+        sonidoGameOver = soundPool.load(this, R.raw.gameover, 1);
+        sonidoFallo = soundPool.load(this, R.raw.failure, 1);
+        soniCarita = soundPool.load(this, R.raw.sonidocarita, 1);
 
         numBombas = getIntent().getIntExtra("CANTIDAD_BOMBAS", 10);
 
@@ -86,23 +113,35 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
 
                             if(casillas[f][c].dentro(corX, corY)){
                                 if (casillas[f][c].getContenido() == 100){
+                                    soundPool.play(sonidoFallo, 1, 1, 0, 0, 1);
                                     casillas[f][c].setDestapado(true);
                                     mostrarTodasLasBombas();
                                     juegoActivo = false;
                                     cronometro.stop();
 
                                     btnReiniciar.setImageResource(R.drawable.gameovercara);
+                                    soundPool.play(sonidoPerder, 1, 1, 0, 0, 1);
                                     perdedorAnimacion.setVisibility(View.VISIBLE);
                                     perdedorAnimacion.playAnimation();
 
-                                    //toastGanador(R.layout.game_over);
+
+                                    new Handler().postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            soundPool.play(sonidoGameOver, 1, 1, 0, 0, 1);
+                                        }
+                                    }, 1200);
+
+
 
                                 }else{
+                                    soundPool.play(sonidoCasilla, 1, 1, 0, 0, 1);
                                     if (casillas[f][c].banderita == true){
                                         txtBombas.setText(" : " + (++numBanderitas));
                                     }
                                     recorrer(f, c);
                                     if (contadorCasillas == (64 - numBombas)){
+                                        soundPool.play(sonidoVictoria, 1, 1, 0, 0, 1);
                                         mostrarTodasLasBombas();
                                         juegoActivo = false;
                                         cronometro.stop();
@@ -114,6 +153,7 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
                                         animacionConfeti.playAnimation();
 
                                         winnerAnimacion.setVisibility(View.VISIBLE);
+                                        winnerAnimacion.setSpeed(0.8f);
                                         winnerAnimacion.playAnimation();
 
                                         //toastGanador(R.layout.winner);
@@ -141,6 +181,7 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
                     for (int f = 0; f < 8; f++){
                         for (int c = 0; c < 8; c++) {
                             if(casillas[f][c].dentro(corX, corY)){
+                                soundPool.play(sonidoBanderita, 1, 1, 0, 0, 1);
                                 if (!casillas[f][c].destapado){
                                     casillas[f][c].banderita = !casillas[f][c].banderita;
 
@@ -154,14 +195,10 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
                                 }
 
                             }
-
                         }
-
                     }
                 }
             }
-
-
         });
 
         iniciarJuego();
@@ -169,15 +206,16 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
         btnReiniciar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                soundPool.play(soniCarita, 1, 1, 0, 0, 1);
+
                iniciarJuego();
             }
         });
 
-
-
     }
 
     private void iniciarJuego() {
+
         contadorCasillas = 0;
         juegoActivo = true;
         btnReiniciar.setImageResource(R.drawable.jugando);
@@ -191,11 +229,10 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
         winnerAnimacion.cancelAnimation();
         perdedorAnimacion.setVisibility(View.GONE);
         perdedorAnimacion.cancelAnimation();
-
         numBanderitas = numBombas;
 
         do{
-            fondoRandom = (int) (Math.random() * 6) +1;
+            fondoRandom = (int) (Math.random() * 11) +1;
         }while (fondoRandom == numFondo);
 
         numFondo = fondoRandom;
@@ -206,6 +243,11 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
             case 4 -> imagenFondo.setImageResource(R.drawable.scoobydoo);
             case 5 -> imagenFondo.setImageResource(R.drawable.rickymorty);
             case 6 -> imagenFondo.setImageResource(R.drawable.jocker);
+            case 7 -> imagenFondo.setImageResource(R.drawable.picoroygohan);
+            case 8 -> imagenFondo.setImageResource(R.drawable.naruto);
+            case 9 -> imagenFondo.setImageResource(R.drawable.kungfupanda);
+            case 10 -> imagenFondo.setImageResource(R.drawable.ededdyeddy);
+            case 11 -> imagenFondo.setImageResource(R.drawable.pokemon);
         }
 
         //Creación y referencia al Tablero
@@ -413,6 +455,27 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
                                 //jocker
                                 relleno = "#9f5a4a";
                                 sombra ="#421f1b";
+                            }case 7 -> {
+                                //picoro y gohan
+                                relleno = "#674465";
+                                sombra ="#37243a";
+                            }case 8 -> {
+                                //naruto
+                                relleno = "#e17439";
+                                sombra ="#934433";
+                            }case 9 -> {
+                                //kung fu panda
+                                relleno = "#fde9ae";
+                                sombra ="#898272";
+
+                            }case 10 -> {
+                                //ed edd y eddy
+                                relleno = "#a78a6c";
+                                sombra ="#5c5044";
+                            }case 11 -> {
+                                //pokemon
+                                relleno = "#ffd723";
+                                sombra ="#8f6e30";
                             }
                         }
 
@@ -482,6 +545,17 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
 
         }
 
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (soundPool != null) {
+            soundPool.release();
+            soundPool = null;
+        }
     }
 
 
