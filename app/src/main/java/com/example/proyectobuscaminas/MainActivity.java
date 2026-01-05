@@ -2,18 +2,19 @@ package com.example.proyectobuscaminas;
 
 
 
-import static java.lang.Thread.sleep;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.view.GestureDetector;
@@ -39,19 +40,20 @@ import com.airbnb.lottie.LottieAnimationView;
 
 public class MainActivity  extends AppCompatActivity implements View.OnTouchListener {
     private Tablero fondo;
-    private MediaPlayer mpMusica;
     private int corX, corY, numBombas, numBanderitas, fondoRandom, contadorCasillas,
-            numFondo = 0, sonidoCasilla, sonidoBanderita, sonidoVictoria, sonidoPerder, sonidoGameOver, sonidoFallo, soniCarita;
+            numFondo = 0, sonidoCasilla, sonidoBanderita, sonidoVictoria, sonidoPerder,
+            sonidoGameOver, sonidoFallo, soniCarita, sonidoCuentaAtras, sonidoFinal;
     private ImageView imagenFondo;
     private LinearLayout layout;
-    private boolean juegoActivo;
+    private Chronometer cronometro;
+    private boolean juegoActivo, clasico;
     private Casilla [][] casillas;
     private ImageButton btnReiniciar;
-    private TextView txtBombas;
-    private Chronometer cronometro;
+    private TextView txtBombas, txtCronometro;
     private LottieAnimationView animacionConfeti, winnerAnimacion, perdedorAnimacion;
     private GestureDetector gestureDetector;
     private SoundPool soundPool;
+    private CountDownTimer cuentaAtras;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,16 +82,20 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
         sonidoGameOver = soundPool.load(this, R.raw.gameover, 1);
         sonidoFallo = soundPool.load(this, R.raw.failure, 1);
         soniCarita = soundPool.load(this, R.raw.sonidocarita, 1);
+        sonidoCuentaAtras = soundPool.load(this, R.raw.cuentaatras, 1);
+        sonidoFinal = soundPool.load(this, R.raw.cuentafinal, 1);
 
         numBombas = getIntent().getIntExtra("CANTIDAD_BOMBAS", 10);
+        clasico = getIntent().getBooleanExtra("CLASICO", true);
 
         btnReiniciar = findViewById(R.id.btnReiniciar);
         imagenFondo = findViewById(R.id.imagenFondo);
         txtBombas = findViewById(R.id.txtBombas);
-        cronometro = findViewById(R.id.cronometro);
+        txtCronometro = findViewById(R.id.txtCronometro);
         animacionConfeti = findViewById(R.id.animacionConfeti);
         winnerAnimacion = findViewById(R.id.winner);
         perdedorAnimacion = findViewById(R.id.perdedor);
+        cronometro = findViewById(R.id.cronometro);
 
         layout = findViewById(R.id.linearLayout);
         fondo = new Tablero(this);
@@ -115,24 +121,7 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
                                 if (casillas[f][c].getContenido() == 100){
                                     soundPool.play(sonidoFallo, 1, 1, 0, 0, 1);
                                     casillas[f][c].setDestapado(true);
-                                    mostrarTodasLasBombas();
-                                    juegoActivo = false;
-                                    cronometro.stop();
-
-                                    btnReiniciar.setImageResource(R.drawable.gameovercara);
-                                    soundPool.play(sonidoPerder, 1, 1, 0, 0, 1);
-                                    perdedorAnimacion.setVisibility(View.VISIBLE);
-                                    perdedorAnimacion.playAnimation();
-
-
-                                    new Handler().postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            soundPool.play(sonidoGameOver, 1, 1, 0, 0, 1);
-                                        }
-                                    }, 1200);
-
-
+                                    gameOver();
 
                                 }else{
                                     soundPool.play(sonidoCasilla, 1, 1, 0, 0, 1);
@@ -141,22 +130,7 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
                                     }
                                     recorrer(f, c);
                                     if (contadorCasillas == (64 - numBombas)){
-                                        soundPool.play(sonidoVictoria, 1, 1, 0, 0, 1);
-                                        mostrarTodasLasBombas();
-                                        juegoActivo = false;
-                                        cronometro.stop();
-                                        txtBombas.setText(" : 0");
-
-                                        btnReiniciar.setImageResource(R.drawable.ganador);
-
-                                        animacionConfeti.setVisibility(View.VISIBLE);
-                                        animacionConfeti.playAnimation();
-
-                                        winnerAnimacion.setVisibility(View.VISIBLE);
-                                        winnerAnimacion.setSpeed(0.8f);
-                                        winnerAnimacion.playAnimation();
-
-                                        //toastGanador(R.layout.winner);
+                                        winner();
 
                                     }
                                 }
@@ -207,21 +181,60 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
             @Override
             public void onClick(View v) {
                 soundPool.play(soniCarita, 1, 1, 0, 0, 1);
-
-               iniciarJuego();
+                iniciarJuego();
             }
         });
 
     }
 
-    private void iniciarJuego() {
 
+    private void iniciarJuego() {
+        reinicioJuego();
+        long tiempoJuego = 120000; // 2min
+
+        if (clasico){
+            cronometro.setBase(SystemClock.elapsedRealtime());
+            cronometro.start();
+            txtCronometro.setVisibility(View.GONE);
+            cronometro.setVisibility(View.VISIBLE);
+
+        }else{
+            if(numBombas >= 20) {
+                tiempoJuego = 300000; // 5 minutos
+            } else if (numBombas >= 15) {
+                tiempoJuego = 180000; // 3 minutos
+            }
+            txtCronometro.setVisibility(View.VISIBLE);
+            cronometro.setVisibility(View.GONE);
+            iniciarCuentaAtras(tiempoJuego);
+
+
+        }
+
+        fondoAleatorio();
+
+        //Creación y referencia al Tablero
+        casillas = new Casilla[8][8];
+        for (int f = 0; f < 8; f++){
+            for (int c = 0; c < 8; c++) {
+                casillas[f][c] = new Casilla();
+            }
+        }
+
+        ubicarBombas();
+        ubicarNumeros();
+
+        //Actualizar la vista del tablero (pintarlo de nuevo)
+        if (fondo != null) {
+            fondo.invalidate();
+        }
+    }
+
+    private void reinicioJuego() {
         contadorCasillas = 0;
         juegoActivo = true;
         btnReiniciar.setImageResource(R.drawable.jugando);
         txtBombas.setText(" : " + numBombas);
-        cronometro.setBase(SystemClock.elapsedRealtime());
-        cronometro.start();
 
         animacionConfeti.setVisibility(View.GONE);
         animacionConfeti.cancelAnimation();
@@ -230,7 +243,9 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
         perdedorAnimacion.setVisibility(View.GONE);
         perdedorAnimacion.cancelAnimation();
         numBanderitas = numBombas;
+    }
 
+    private void fondoAleatorio() {
         do{
             fondoRandom = (int) (Math.random() * 11) +1;
         }while (fondoRandom == numFondo);
@@ -249,22 +264,95 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
             case 10 -> imagenFondo.setImageResource(R.drawable.ededdyeddy);
             case 11 -> imagenFondo.setImageResource(R.drawable.pokemon);
         }
+    }
 
-        //Creación y referencia al Tablero
-        casillas = new Casilla[8][8];
-        for (int f = 0; f < 8; f++){
-            for (int c = 0; c < 8; c++) {
-                casillas[f][c] = new Casilla();
+    private void iniciarCuentaAtras(long tiempoJuego) {
+        if (cuentaAtras != null){
+            cuentaAtras.cancel();
+
+        }
+        cuentaAtras = new CountDownTimer(tiempoJuego, 1000) {
+            @Override
+            public void onFinish() {
+                txtCronometro.setText("00:00");
+                gameOverPorTiempo();
             }
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                int segundos = (int) (millisUntilFinished / 1000);
+                int minutos = segundos / 60;
+                segundos = segundos % 60;
+
+                txtCronometro.setText(String.format("%02d:%02d", minutos, segundos));
+
+                if (millisUntilFinished < 11000 && millisUntilFinished > 1000){
+                    soundPool.play(sonidoCuentaAtras, 0.2f, 0.2f, 0, 0, 1);
+                    txtCronometro.setTextColor(Color.RED);
+
+                } else if (millisUntilFinished < 1000) {
+                    soundPool.play(sonidoFinal, 0.2f, 0.2f, 0, 0, 1);
+                } else{
+                    txtCronometro.setTextColor(Color.BLACK);
+                }
+
+            }
+        }.start();
+    }
+
+    private void gameOverPorTiempo() {
+        if (juegoActivo){
+            gameOver();
+        }
+    }
+
+    private void gameOver() {
+        juegoActivo = false;
+        mostrarTodasLasBombas();
+
+        if (clasico){
+            cronometro.stop();
+        }else{
+            cuentaAtras.cancel();
         }
 
-        ubicarBombas();
-        ubicarNumeros();
+        soundPool.play(sonidoPerder, 1, 1, 0, 0, 1);
+        btnReiniciar.setImageResource(R.drawable.gameovercara);
 
-        //Actualizar la vista del tablero (pintarlo de nuevo)
-        if (fondo != null) {
-            fondo.invalidate();
+        perdedorAnimacion.setVisibility(View.VISIBLE);
+        perdedorAnimacion.playAnimation();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                soundPool.play(sonidoGameOver, 1, 1, 0, 0, 1);
+            }
+        }, 1200);
+
+        fondo.invalidate();
+    }
+
+    //Metodo que contine la logica y animación de victoria
+    private void winner() {
+        soundPool.play(sonidoVictoria, 1, 1, 0, 0, 1);
+        mostrarTodasLasBombas();
+        juegoActivo = false;
+        txtBombas.setText(" : 0");
+
+        if (clasico){
+            cronometro.stop();
+        }else{
+            cuentaAtras.cancel();
         }
+
+        btnReiniciar.setImageResource(R.drawable.ganador);
+
+        animacionConfeti.setVisibility(View.VISIBLE);
+        animacionConfeti.playAnimation();
+
+        winnerAnimacion.setVisibility(View.VISIBLE);
+        winnerAnimacion.setSpeed(0.8f);
+        winnerAnimacion.playAnimation();
     }
 
     private void ubicarBombas() {
@@ -292,7 +380,7 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
         }
     }
 
-
+    //Bucle anidado para poder contar cuantas bombas hay en el entrono 3x3 de cada casilla
     private void ubicarNumeros() {
         int contador;
         for (int f = 0; f < 8; f++){
@@ -338,16 +426,6 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
         return true;
 
     }
-
-    private void toastGanador(int game_layout) {
-        LayoutInflater inflater = getLayoutInflater();
-        View layout = inflater.inflate(game_layout, null);
-        Toast notificacionImagen = new Toast(this);
-        notificacionImagen.setDuration(Toast.LENGTH_SHORT);
-        notificacionImagen.setView(layout);
-        notificacionImagen.show();
-    }
-
 
     private void recorrer(int fil, int col) {
         if (fil >= 0 && fil < 8 && col >= 0 && col < 8){
@@ -555,6 +633,10 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
         if (soundPool != null) {
             soundPool.release();
             soundPool = null;
+        }
+
+        if (cuentaAtras != null) {
+            cuentaAtras.cancel();
         }
     }
 

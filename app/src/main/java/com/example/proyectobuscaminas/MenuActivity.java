@@ -19,12 +19,12 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 
 public class MenuActivity extends AppCompatActivity {
     private Button btnJugar;
-    private boolean silencio = false;
+    private boolean silencio = false, modoJuegoClasico = true;
     private int numeroBombas, sonidoClick;
     private boolean yendoAlJuego;
 
-    private MaterialButtonToggleGroup tgDificultad;
-    private Button btnFacil, btnMedio, btnDificil;
+    private MaterialButtonToggleGroup tgDificultad, tgModoJuego;
+    private Button btnFacil, btnMedio, btnDificil, btnClasico, btnDesafio;
     private ImageView imgFondo, ivSonido;
     private SoundPool soundPool;
     private MediaPlayer musica;
@@ -60,9 +60,12 @@ public class MenuActivity extends AppCompatActivity {
         btnDificil = findViewById(R.id.btnDificil);
         imgFondo = findViewById(R.id.imagenFondo);
         ivSonido = findViewById(R.id.ivSonido);
+        tgModoJuego = findViewById(R.id.tgModoJuego);
+        btnClasico = findViewById(R.id.btnClasico);
+        btnDesafio = findViewById(R.id.btnDesafio);
 
         musica = MediaPlayer.create(this, R.raw.modofacil);
-        musica.setVolume(0.2f, 0.2f);
+        musica.setVolume(0.5f, 0.5f);
         musica.start();
         musica.setLooping(true);
 
@@ -83,11 +86,32 @@ public class MenuActivity extends AppCompatActivity {
             }
         });
 
+        btnClasico.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                soundPool.play(sonidoClick, 1, 1, 0, 0, 1);
+                btnDesafio.setTextSize(15);
+                btnClasico.setTextSize(17);
+                modoJuegoClasico = true;
+
+            }
+        });
+
+        btnDesafio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                soundPool.play(sonidoClick, 1, 1, 0, 0, 1);
+                btnClasico.setTextSize(15);
+                btnDesafio.setTextSize(17);
+                modoJuegoClasico = false;
+            }
+        });
+
         btnFacil.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 soundPool.play(sonidoClick, 1, 1, 0, 0, 1);
-                btnFacil.setTextSize(20);
+                btnFacil.setTextSize(17);
                 btnMedio.setTextSize(15);
                 btnDificil.setTextSize(15);
                 imgFondo.setImageResource(R.drawable.agallaspordefecto);
@@ -96,7 +120,7 @@ public class MenuActivity extends AppCompatActivity {
                     musica.stop();
                     musica.release();
                     musica = MediaPlayer.create(MenuActivity.this, R.raw.modofacil);
-                    musica.setVolume(0.2f, 0.2f);
+                    musica.setVolume(0.5f, 0.5f);
                     musica.start();
                     musica.setLooping(true);
 
@@ -110,7 +134,7 @@ public class MenuActivity extends AppCompatActivity {
             public void onClick(View v) {
                 soundPool.play(sonidoClick, 1, 1, 0, 0, 1);
 
-                btnMedio.setTextSize(20);
+                btnMedio.setTextSize(17);
                 imgFondo.setImageResource(R.drawable.agallasmedio);
                 btnFacil.setTextSize(15);
                 btnDificil.setTextSize(15);
@@ -119,7 +143,7 @@ public class MenuActivity extends AppCompatActivity {
                     musica.stop();
                     musica.release();
                     musica = MediaPlayer.create(MenuActivity.this, R.raw.modomedio);
-                    musica.setVolume(0.2f, 0.2f);
+                    musica.setVolume(0.5f, 0.5f);
                     musica.start();
                     musica.setLooping(true);
 
@@ -132,7 +156,7 @@ public class MenuActivity extends AppCompatActivity {
             public void onClick(View v) {
                 soundPool.play(sonidoClick, 1, 1, 0, 0, 1);
 
-                btnDificil.setTextSize(20);
+                btnDificil.setTextSize(17);
                 imgFondo.setImageResource(R.drawable.agallasdificil);
                 btnFacil.setTextSize(15);
                 btnMedio.setTextSize(15);
@@ -142,7 +166,7 @@ public class MenuActivity extends AppCompatActivity {
                     musica.stop();
                     musica.release();
                     musica = MediaPlayer.create(MenuActivity.this, R.raw.mododificil);
-                    musica.setVolume(0.2f, 0.2f);
+                    musica.setVolume(0.5f, 0.5f);
                     musica.start();
                     musica.setLooping(true);
 
@@ -170,6 +194,7 @@ public class MenuActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(MenuActivity.this, MainActivity.class);
                 intent.putExtra("CANTIDAD_BOMBAS", numeroBombas);
+                intent.putExtra("CLASICO", modoJuegoClasico);
                 startActivity(intent);
             }
         });

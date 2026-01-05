@@ -15,89 +15,132 @@
         android:src="@drawable/agallaspordefecto"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <ImageView
         android:id="@+id/imagenTitulo"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="180dp"
         android:scaleType="centerCrop"
-        android:layout_marginTop="15dp"
         android:src="@drawable/titulobuscaminas"
-        app:layout_constraintEnd_toEndOf="parent"
+        tools:layout_editor_absoluteY="45dp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/tgDificultad"/>
 
-   <com.google.android.material.button.MaterialButtonToggleGroup
-       android:id="@+id/tgDificultad"
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-       app:singleSelection="true"
-       app:checkedButton="@+id/btnFacil"
-       app:selectionRequired="true"
-       app:layout_constraintTop_toBottomOf="@+id/imagenTitulo"
-       app:layout_constraintStart_toStartOf="parent"
-       app:layout_constraintEnd_toEndOf="parent"
-       app:layout_constraintBottom_toTopOf="@+id/btnJugar">
-       <Button
-           android:id="@+id/btnFacil"
-           style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:text="FACIL"
-           android:textSize="20sp"
-           android:fontFamily="@font/arcadeclassic"
-           android:textColor="@color/white"
-           app:strokeColor="@color/white"/>
 
-       <Button
-           android:id="@+id/btnMedio"
-           style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:text="MEDIO"
-           android:fontFamily="@font/arcadeclassic"
-           android:textColor="@color/white"
-           app:strokeColor="@color/white"/>
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/tgDificultad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:checkedButton="@+id/btnFacil"
+        app:selectionRequired="true"
+        app:singleSelection="true"
+        app:layout_constraintBottom_toTopOf="@+id/tgModoJuego"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imagenTitulo"
+        tools:layout_editor_absoluteX="79dp"
+        tools:layout_editor_absoluteY="222dp">
 
-       <Button
-           android:id="@+id/btnDificil"
-           style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:text="DIFICIL"
-           android:fontFamily="@font/arcadeclassic"
-           android:textColor="@color/white"
-           app:strokeColor="@color/white"/>
+        <Button
+            android:id="@+id/btnFacil"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/arcadeclassic"
+            android:text="FACIL"
+            android:textColor="@drawable/selector_dificultad"
+            android:textSize="17sp"
+            app:strokeColor="@drawable/selector_dificultad" />
 
-   </com.google.android.material.button.MaterialButtonToggleGroup>
+        <Button
+            android:id="@+id/btnMedio"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/arcadeclassic"
+            android:text="MEDIO"
+            android:textColor="@drawable/selector_dificultad"
+            app:strokeColor="@drawable/selector_dificultad" />
+
+        <Button
+            android:id="@+id/btnDificil"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/arcadeclassic"
+            android:text="DIFICIL"
+            android:textColor="@drawable/selector_dificultad"
+            app:strokeColor="@drawable/selector_dificultad" />
+
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/tgModoJuego"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:checkedButton="@+id/btnClasico"
+        app:selectionRequired="true"
+        app:singleSelection="true"
+        app:layout_constraintTop_toBottomOf="@+id/tgDificultad"
+        app:layout_constraintBottom_toTopOf="@+id/btnJugar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:layout_editor_absoluteX="99dp"
+        tools:layout_editor_absoluteY="280dp">
+
+        <Button
+            android:id="@+id/btnClasico"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/arcadeclassic"
+            android:text="CLASICO"
+            android:textColor="@drawable/selector_dificultad"
+            android:textSize="17sp"
+            app:strokeColor="@drawable/selector_dificultad" />
+
+        <Button
+            android:id="@+id/btnDesafio"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/arcadeclassic"
+            android:text="DESAFIO"
+            android:textColor="@drawable/selector_dificultad"
+            app:strokeColor="@drawable/selector_dificultad" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
 
     <Button
         android:id="@+id/btnJugar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Jugar"
-        android:textStyle="bold"
-        android:layout_marginTop="15dp"
-        android:fontFamily="@font/arcade_i"
-        android:textColor="@color/black"
         android:backgroundTint="@color/white"
-        app:layout_constraintTop_toBottomOf="@+id/tgDificultad"
+        android:fontFamily="@font/arcade_i"
+        android:text="Jugar"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@+id/tgModoJuego"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:layout_editor_absoluteX="146dp"
+        tools:layout_editor_absoluteY="341dp" />
 
     <ImageView
         android:id="@+id/ivSonido"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        app:srcCompat="@drawable/sonido"
-        android:layout_marginBottom="180dp"
         android:layout_marginEnd="10dp"
+        android:layout_marginBottom="120dp"
+        app:layout_constraintBottom_toTopOf="@id/tgDificultad"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/tgDificultad"
-        />
+        app:srcCompat="@drawable/sonido" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

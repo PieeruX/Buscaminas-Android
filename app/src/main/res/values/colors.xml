@@ -2,9 +2,10 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="textoCronometro">#FF0000</color>
+    <color name="color_textoCronometro">#FF0000</color>
     <color name="fondoTableroLinLayout">#A29C9C</color>
     <color name="btn_carita_sombra">#808080</color>
     <color name="btn_carita_luz">#FFFFFF</color>
     <color name="btn_carita_relleno">#C0C0C0</color>
+    <color name="btn_deseleccionado">#B3FFFFFF</color>
 </resources>
