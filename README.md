@@ -12,9 +12,9 @@ Un clon moderno y completo del clásico juego **Buscaminas (Minesweeper)** desar
 </p>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/aca94cfc-6421-4b06-8eef-8812a7b4a69b" height="300" />
-  <img src="https://github.com/user-attachments/assets/aad83f1f-71f2-4293-b490-897861f132b7" height="300" />
-  <img src="https://github.com/user-attachments/assets/073f9442-81eb-4157-b414-b0ced1ec0cdf" height="300" />
+  <img src="https://github.com/user-attachments/assets/72bb8d1e-48bd-4bd6-923e-8fef159a5de7" height="300" />
+  <img src="https://github.com/user-attachments/assets/6e445489-aab5-4a19-937b-5789fd23fcc6" height="300" />
+  <img src="https://github.com/user-attachments/assets/df1116bd-7430-4855-ade9-caeb972d701b" height="300" />
   <img src="https://github.com/user-attachments/assets/9f813017-0bf0-46eb-8a8e-63f3296cae35" height="300" />
   <img src="https://github.com/user-attachments/assets/883c53be-db3d-4720-b19b-b88fd2006c9f" height="300" />
   <img src="https://github.com/user-attachments/assets/b8c81ff3-ff47-4550-a75d-156e302e6241" height="300" />
