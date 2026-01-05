@@ -1,6 +1,7 @@
 # 💣 Buscaminas Android (Minesweeper Clone)
 
 **Proyecto académico desarrollado en 2º DAM para la asignatura de Programación Móvil.**
+
 Un clon moderno y completo del clásico juego **Buscaminas (Minesweeper)** desarrollado en Android nativo con **Java**. Este proyecto recrea la experiencia clásica de Windows 95 pero con una interfaz renovada, animaciones fluidas y características modernas.
 
 <p align="center">
