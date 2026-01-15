@@ -1,32 +1,26 @@
 package com.example.proyectobuscaminas;
 
-
-
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioAttributes;
-import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.view.GestureDetector;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,15 +35,17 @@ import com.airbnb.lottie.LottieAnimationView;
 public class MainActivity  extends AppCompatActivity implements View.OnTouchListener {
     private Tablero fondo;
     private int corX, corY, numBombas, numBanderitas, fondoRandom, contadorCasillas,
-            numFondo = 0, sonidoCasilla, sonidoBanderita, sonidoVictoria, sonidoPerder,
-            sonidoGameOver, sonidoFallo, soniCarita, sonidoCuentaAtras, sonidoFinal;
+            numFondo, sonidoCasilla, sonidoBanderita, sonidoVictoria, sonidoPerder,
+            sonidoGameOver, sonidoFallo, soniCarita, sonidoCuentaAtras, sonidoFinal, numCasillas, numFilas;
+    private final int NUM_COLUMNAS = 8;
+
     private ImageView imagenFondo;
     private LinearLayout layout;
     private Chronometer cronometro;
     private boolean juegoActivo, clasico;
     private Casilla [][] casillas;
     private ImageButton btnReiniciar;
-    private TextView txtBombas, txtCronometro;
+    private TextView txtBombas, txtCronometro, txtCasillas;
     private LottieAnimationView animacionConfeti, winnerAnimacion, perdedorAnimacion;
     private GestureDetector gestureDetector;
     private SoundPool soundPool;
@@ -65,6 +61,134 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        //Datos del intent
+        numBombas = getIntent().getIntExtra("CANTIDAD_BOMBAS", 10);
+        clasico = getIntent().getBooleanExtra("CLASICO", true);
+        numFilas = getIntent().getIntExtra("NUM_FILAS", 8);
+
+
+        btnReiniciar = findViewById(R.id.btnReiniciar);
+        imagenFondo = findViewById(R.id.imagenFondo);
+        txtBombas = findViewById(R.id.txtBombas);
+        txtCronometro = findViewById(R.id.txtCronometro);
+        txtCasillas = findViewById(R.id.txtCasillas);
+        animacionConfeti = findViewById(R.id.animacionConfeti);
+        winnerAnimacion = findViewById(R.id.winner);
+        perdedorAnimacion = findViewById(R.id.perdedor);
+        cronometro = findViewById(R.id.cronometro);
+
+        layout = findViewById(R.id.linearLayout);
+
+        if (numFilas != NUM_COLUMNAS){
+            //Calculamos el alto del layout
+            int nuevaAltuta = numFilas * 40;
+            float dpApixeles = getResources().getDisplayMetrics().density;
+            int nuevaAltutaPx = (int) (nuevaAltuta * dpApixeles);
+
+            //Se añade el nuevo valor de altura al layout
+            ViewGroup.LayoutParams parametros = layout.getLayoutParams();
+            parametros.height = nuevaAltutaPx;
+            layout.setLayoutParams(parametros);
+        }
+
+        fondo = new Tablero(this);
+        fondo.setOnTouchListener(this);
+        layout.addView(fondo);
+
+        efectoSonido();
+        controlPulsacion();
+        iniciarJuego();
+
+        btnReiniciar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                soundPool.play(soniCarita, 1, 1, 0, 0, 1);
+                iniciarJuego();
+            }
+        });
+
+    }
+
+    //Controlamos pulsaciones del usuario
+    private void controlPulsacion() {
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener(){
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
+
+            //pulsado normal
+            @Override
+            public boolean onSingleTapUp(MotionEvent event) {
+                if (juegoActivo){
+                    corX =(int) event.getX();
+                    corY = (int) event.getY();
+
+                    for (int f = 0; f < numFilas; f++){
+                        for (int c = 0; c < NUM_COLUMNAS; c++) {
+
+                            if(casillas[f][c].dentro(corX, corY)){
+                                if (casillas[f][c].getContenido() == 100){
+                                    soundPool.play(sonidoFallo, 1, 1, 0, 0, 1);
+                                    casillas[f][c].setDestapado(true);
+                                    gameOver();
+
+                                }else{
+                                    soundPool.play(sonidoCasilla, 1, 1, 0, 0, 1);
+                                    if (casillas[f][c].banderita == true){
+                                        txtBombas.setText(" : " + (++numBanderitas));
+                                    }
+                                    recorrer(f, c);
+                                    if (contadorCasillas == ((NUM_COLUMNAS*numFilas) - numBombas)){
+                                        winner();
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                //Provocar que vuelva a pintar (metodo onDraw)
+                fondo.invalidate();
+                return true;
+            }
+
+            //Pulsado largo
+            @Override
+            public void onLongPress(MotionEvent event) {
+
+                if (juegoActivo){
+                    corX =(int) event.getX();
+                    corY = (int) event.getY();
+
+                    for (int f = 0; f < numFilas; f++){
+                        for (int c = 0; c < NUM_COLUMNAS; c++) {
+                            if(casillas[f][c].dentro(corX, corY)){
+                                if (!casillas[f][c].destapado){
+                                    soundPool.play(sonidoBanderita, 1, 1, 0, 0, 1);
+                                    casillas[f][c].banderita = !casillas[f][c].banderita;
+
+                                    if (casillas[f][c].banderita == true){
+                                        txtBombas.setText(" : " + (--numBanderitas));
+                                    }else{
+                                        txtBombas.setText(" : " + (++numBanderitas));
+                                    }
+
+                                    fondo.invalidate();
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    //Agregamos efectos de sonido
+    private void efectoSonido() {
 
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_GAME)
@@ -84,107 +208,6 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
         soniCarita = soundPool.load(this, R.raw.sonidocarita, 1);
         sonidoCuentaAtras = soundPool.load(this, R.raw.cuentaatras, 1);
         sonidoFinal = soundPool.load(this, R.raw.cuentafinal, 1);
-
-        numBombas = getIntent().getIntExtra("CANTIDAD_BOMBAS", 10);
-        clasico = getIntent().getBooleanExtra("CLASICO", true);
-
-        btnReiniciar = findViewById(R.id.btnReiniciar);
-        imagenFondo = findViewById(R.id.imagenFondo);
-        txtBombas = findViewById(R.id.txtBombas);
-        txtCronometro = findViewById(R.id.txtCronometro);
-        animacionConfeti = findViewById(R.id.animacionConfeti);
-        winnerAnimacion = findViewById(R.id.winner);
-        perdedorAnimacion = findViewById(R.id.perdedor);
-        cronometro = findViewById(R.id.cronometro);
-
-        layout = findViewById(R.id.linearLayout);
-        fondo = new Tablero(this);
-        fondo.setOnTouchListener(this);
-        layout.addView(fondo);
-
-        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener(){
-            @Override
-            public boolean onDown(MotionEvent e) {
-                return true;
-            }
-
-            @Override
-            public boolean onSingleTapUp(MotionEvent event) {
-                if (juegoActivo){
-                    corX =(int) event.getX();
-                    corY = (int) event.getY();
-
-                    for (int f = 0; f < 8; f++){
-                        for (int c = 0; c < 8; c++) {
-
-                            if(casillas[f][c].dentro(corX, corY)){
-                                if (casillas[f][c].getContenido() == 100){
-                                    soundPool.play(sonidoFallo, 1, 1, 0, 0, 1);
-                                    casillas[f][c].setDestapado(true);
-                                    gameOver();
-
-                                }else{
-                                    soundPool.play(sonidoCasilla, 1, 1, 0, 0, 1);
-                                    if (casillas[f][c].banderita == true){
-                                        txtBombas.setText(" : " + (++numBanderitas));
-                                    }
-                                    recorrer(f, c);
-                                    if (contadorCasillas == (64 - numBombas)){
-                                        winner();
-
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                //Provocar que vuelva a pintar (metodo onDraw)
-                fondo.invalidate();
-                return true;
-            }
-
-            //Click largo
-            @Override
-            public void onLongPress(MotionEvent event) {
-
-                if (juegoActivo){
-                    corX =(int) event.getX();
-                    corY = (int) event.getY();
-
-                    for (int f = 0; f < 8; f++){
-                        for (int c = 0; c < 8; c++) {
-                            if(casillas[f][c].dentro(corX, corY)){
-                                soundPool.play(sonidoBanderita, 1, 1, 0, 0, 1);
-                                if (!casillas[f][c].destapado){
-                                    casillas[f][c].banderita = !casillas[f][c].banderita;
-
-                                    if (casillas[f][c].banderita == true){
-                                        txtBombas.setText(" : " + (--numBanderitas));
-                                    }else{
-                                        txtBombas.setText(" : " + (++numBanderitas));
-                                    }
-
-                                    fondo.invalidate();
-                                }
-
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        iniciarJuego();
-
-        btnReiniciar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                soundPool.play(soniCarita, 1, 1, 0, 0, 1);
-                iniciarJuego();
-            }
-        });
-
     }
 
 
@@ -199,6 +222,7 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
             cronometro.setVisibility(View.VISIBLE);
 
         }else{
+            //Modo desafio
             if(numBombas >= 20) {
                 tiempoJuego = 300000; // 5 minutos
             } else if (numBombas >= 15) {
@@ -214,9 +238,9 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
         fondoAleatorio();
 
         //Creación y referencia al Tablero
-        casillas = new Casilla[8][8];
-        for (int f = 0; f < 8; f++){
-            for (int c = 0; c < 8; c++) {
+        casillas = new Casilla[numFilas][NUM_COLUMNAS];
+        for (int f = 0; f < numFilas; f++){
+            for (int c = 0; c < NUM_COLUMNAS; c++) {
                 casillas[f][c] = new Casilla();
             }
         }
@@ -235,6 +259,8 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
         juegoActivo = true;
         btnReiniciar.setImageResource(R.drawable.jugando);
         txtBombas.setText(" : " + numBombas);
+        numCasillas = (NUM_COLUMNAS * numFilas) - numBombas;
+        txtCasillas.setText(" : " + numCasillas);
 
         animacionConfeti.setVisibility(View.GONE);
         animacionConfeti.cancelAnimation();
@@ -243,6 +269,7 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
         perdedorAnimacion.setVisibility(View.GONE);
         perdedorAnimacion.cancelAnimation();
         numBanderitas = numBombas;
+
     }
 
     private void fondoAleatorio() {
@@ -251,19 +278,48 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
         }while (fondoRandom == numFondo);
 
         numFondo = fondoRandom;
-        switch (numFondo){
-            case 1 -> imagenFondo.setImageResource(R.drawable.horadeaventuras);
-            case 2 -> imagenFondo.setImageResource(R.drawable.goku2);
-            case 3 -> imagenFondo.setImageResource(R.drawable.gokushenlong);
-            case 4 -> imagenFondo.setImageResource(R.drawable.scoobydoo);
-            case 5 -> imagenFondo.setImageResource(R.drawable.rickymorty);
-            case 6 -> imagenFondo.setImageResource(R.drawable.jocker);
-            case 7 -> imagenFondo.setImageResource(R.drawable.picoroygohan);
-            case 8 -> imagenFondo.setImageResource(R.drawable.naruto);
-            case 9 -> imagenFondo.setImageResource(R.drawable.kungfupanda);
-            case 10 -> imagenFondo.setImageResource(R.drawable.ededdyeddy);
-            case 11 -> imagenFondo.setImageResource(R.drawable.pokemon);
+
+        if (numBombas == 20){
+            imagenFondo.setImageResource(generarFondoDificil(numFondo));
+        } else if (numBombas == 15) {
+            imagenFondo.setImageResource(generarFondoMedio(numFondo));
+        } else{
+            imagenFondo.setImageResource(generarFondo(numFondo));
         }
+    }
+
+
+    private int generarFondoDificil(int numFondo) {
+        int fondos [] = {
+                R.drawable.horadeaventuras, R.drawable.goku2d, R.drawable.gokushenlongd,
+                R.drawable.scoobydood, R.drawable.rickymortyr, R.drawable.jockerd,
+                R.drawable.picoroygohand, R.drawable.naruto, R.drawable.kungfupandar,
+                R.drawable.ededdyeddyr, R.drawable.pokemon};
+
+        return fondos[numFondo -1];
+
+    }
+
+    private int generarFondoMedio(int numFondo) {
+        int fondos [] = {
+                R.drawable.horadeaventuras, R.drawable.goku2r, R.drawable.gokushenlongr,
+                R.drawable.scoobydoor, R.drawable.rickymorty, R.drawable.jockerr,
+                R.drawable.picoroygohanr, R.drawable.naruto, R.drawable.kungfupanda,
+                R.drawable.ededdyeddyr, R.drawable.pokemon};
+
+        return fondos[numFondo -1];
+
+    }
+
+    private int generarFondo(int numFondo) {
+        int fondos [] = {
+                R.drawable.horadeaventuras, R.drawable.goku2, R.drawable.gokushenlong,
+                R.drawable.scoobydoo, R.drawable.rickymorty, R.drawable.jocker,
+                R.drawable.picoroygohan, R.drawable.naruto, R.drawable.kungfupanda,
+                R.drawable.ededdyeddy, R.drawable.pokemon};
+
+        return fondos[numFondo -1];
+
     }
 
     private void iniciarCuentaAtras(long tiempoJuego) {
@@ -271,26 +327,33 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
             cuentaAtras.cancel();
 
         }
+
+        //Orden de cada cuantos segundo se ejecuta el metodo
         cuentaAtras = new CountDownTimer(tiempoJuego, 1000) {
+            //Acción cuando se acaba el tiempo
             @Override
             public void onFinish() {
                 txtCronometro.setText("00:00");
-                gameOverPorTiempo();
+                if (juegoActivo){
+                    gameOver();
+                }
             }
-
+            //Ejecucion del metodo cada 1seg, como determinammos arriba
             @Override
             public void onTick(long millisUntilFinished) {
                 int segundos = (int) (millisUntilFinished / 1000);
+                //obtenemos los minutos
                 int minutos = segundos / 60;
+                //modulo para obtener los segundos restantes
                 segundos = segundos % 60;
 
                 txtCronometro.setText(String.format("%02d:%02d", minutos, segundos));
 
-                if (millisUntilFinished < 11000 && millisUntilFinished > 1000){
+                if (segundos < 11 && segundos > 1){
                     soundPool.play(sonidoCuentaAtras, 0.2f, 0.2f, 0, 0, 1);
                     txtCronometro.setTextColor(Color.RED);
 
-                } else if (millisUntilFinished < 1000) {
+                } else if (segundos < 1) {
                     soundPool.play(sonidoFinal, 0.2f, 0.2f, 0, 0, 1);
                 } else{
                     txtCronometro.setTextColor(Color.BLACK);
@@ -298,12 +361,6 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
 
             }
         }.start();
-    }
-
-    private void gameOverPorTiempo() {
-        if (juegoActivo){
-            gameOver();
-        }
     }
 
     private void gameOver() {
@@ -359,8 +416,8 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
         int cantidad = numBombas;
 
         do {
-            int fila = (int) (Math.random() * 8);
-            int columna = (int) (Math.random() * 8);
+            int fila = (int) (Math.random() * numFilas);
+            int columna = (int) (Math.random() * NUM_COLUMNAS);
 
             if (casillas[fila][columna].getContenido() == 0){
                 casillas[fila][columna].setContenido(100);
@@ -371,8 +428,8 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
 
         //Escribir por consola el contenido
 
-        for (int f = 0; f < 8; f++) {
-            for (int c = 0; c < 8; c++) {
+        for (int f = 0; f < numFilas; f++) {
+            for (int c = 0; c < NUM_COLUMNAS; c++) {
                 if (casillas[f][c].contenido == 100){
                     System.out.println("Fila " + f + " -- Columna " + c + ":" + casillas[f][c].getContenido());
                 }
@@ -383,12 +440,12 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
     //Bucle anidado para poder contar cuantas bombas hay en el entrono 3x3 de cada casilla
     private void ubicarNumeros() {
         int contador;
-        for (int f = 0; f < 8; f++){
-            for (int c = 0; c < 8; c++) {
+        for (int f = 0; f < numFilas; f++){
+            for (int c = 0; c < NUM_COLUMNAS; c++) {
                 contador = 0;
                 if (casillas[f][c].getContenido() != 100){
                     for (int fila = f - 1; fila <= f + 1; fila++) {
-                        if (fila >= 0 && fila < 8){
+                        if (fila >= 0 && fila < numFilas){
                             for (int columna = c - 1; columna <= c + 1; columna++) {
                                 if (columna >= 0 && columna < 8) {
                                     if (casillas[fila][columna].getContenido() == 100) {
@@ -428,10 +485,12 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
     }
 
     private void recorrer(int fil, int col) {
-        if (fil >= 0 && fil < 8 && col >= 0 && col < 8){
+        if (fil >= 0 && fil < numFilas && col >= 0 && col < NUM_COLUMNAS){
             if (!casillas[fil][col].destapado){
                 casillas[fil][col].setDestapado(true);
                 contadorCasillas++;
+                numCasillas--;
+                txtCasillas.setText(" : " + numCasillas);
                 if (casillas[fil][col].getContenido() == 0) {
                     recorrer(fil, col + 1);
                     recorrer(fil, col - 1);
@@ -447,11 +506,9 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
         }
     }
 
-
-
     private void mostrarTodasLasBombas() {
-        for (int f = 0; f < 8; f++) {
-            for (int c = 0; c < 8; c++) {
+        for (int f = 0; f < numFilas; f++) {
+            for (int c = 0; c < NUM_COLUMNAS; c++) {
                 if (casillas[f][c].getContenido() == 100) {
                     casillas[f][c].setDestapado(true);
                 }
@@ -485,12 +542,12 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
             int ancho = getWidth();
             int alto = getHeight();
 
-            int anchoCasilla = ancho/8;
-            int altoCasilla = alto/8;
+            int anchoCasilla = ancho/NUM_COLUMNAS;
+            int altoCasilla = alto/numFilas;
 
             //Dibujar cada cuadrado y guardar sus coordenadas
-            for (int f = 0; f < 8; f++){
-                for (int c = 0; c < 8; c++) {
+            for (int f = 0; f < numFilas; f++){
+                for (int c = 0; c < NUM_COLUMNAS; c++) {
                     int y = f * altoCasilla;
                     int x = c * anchoCasilla;
 
@@ -501,62 +558,13 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
                     if(!casillas[f][c].destapado){
                         int borde = 5;
 
-                        String sombra = "", luz = "#FFFFFF", relleno="";
+                        String sombra = generarSombra(numFondo),
+                                luz = "#FFFFFF",
+                                relleno = generarRelleno(numFondo);
 
-                        switch (numFondo){
-                            case 1 -> {
-                                //hora de aventuras
-                                relleno= "#fbbd18";
-                                sombra = "#977f3e";
-                            }
-                            case 2 -> {
-                                // goku
-                                relleno = "#e4c584";
-                                sombra = "#5f5744";
-                            }
-                            case 3 -> {
-                                //goku shenlong
-                                relleno = "#e76a24";
-                                sombra = "#855a43";
-
-                            }case 4 -> {
-                                //scooby doo
-                                relleno="#a7772b";
-                                sombra = "#59401a";
-                            }
-                            case 5 -> {
-                                //rick y morty
-                                sombra = "#2d4f3e";
-                                luz = "#c9e260";
-                                relleno = "#40b5cb";
-                            }case 6 -> {
-                                //jocker
-                                relleno = "#9f5a4a";
-                                sombra ="#421f1b";
-                            }case 7 -> {
-                                //picoro y gohan
-                                relleno = "#674465";
-                                sombra ="#37243a";
-                            }case 8 -> {
-                                //naruto
-                                relleno = "#e17439";
-                                sombra ="#934433";
-                            }case 9 -> {
-                                //kung fu panda
-                                relleno = "#fde9ae";
-                                sombra ="#898272";
-
-                            }case 10 -> {
-                                //ed edd y eddy
-                                relleno = "#a78a6c";
-                                sombra ="#5c5044";
-                            }case 11 -> {
-                                //pokemon
-                                relleno = "#ffd723";
-                                sombra ="#8f6e30";
-                            }
+                        if (numFondo == 5){
+                            luz = "#c9e260";
                         }
-
 
                         //Capa de sombra
                         pFondo.setColor(Color.parseColor(sombra));
@@ -570,6 +578,7 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
                         pFondo.setColor(Color.parseColor(relleno));
                         canvas.drawRect(x + borde, y + borde, x + anchoCasilla - borde, y + altoCasilla - borde, pFondo);
 
+                        //pintar banderita si hubo pulsación larga
                         if (casillas[f][c].banderita){
                             int margen = 20;
                             imgPulsadoLargo.setBounds(x+ margen, y+ margen, x + anchoCasilla -margen, y + altoCasilla -margen);
@@ -577,6 +586,7 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
                         }
 
                     }else{
+                        //pintar casilla abierta
                         pFondo.setColor(Color.GRAY);
                         canvas.drawRect(x, y, x + anchoCasilla, y + anchoCasilla, pFondo);
 
@@ -588,11 +598,13 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
                         if (valorCasilla == 100){
                             int margen = 20;
 
-                            if (contadorCasillas == (64 - numBombas)){
+                            //Al ganar se pintan las bombas como banderas
+                            if (contadorCasillas == ((NUM_COLUMNAS * numFilas) - numBombas)){
                                 imagenBandera.setBounds(x+ margen, y+margen, x + anchoCasilla -margen, y + altoCasilla-margen);
                                 imagenBandera.draw(canvas);
 
                             }else{
+                                //al perder se pintan las bombas
                                 imagenBomba.setBounds(x+margen, y+margen, x + anchoCasilla -margen, y + altoCasilla-margen);
                                 imagenBomba.draw(canvas);
                             }
@@ -602,9 +614,9 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
 
                             switch (valorCasilla){
                                 case 1 -> pNumero.setColor(Color.BLUE);
-                                case 2 -> pNumero.setColor(Color.parseColor("#008000")); // Verde oscuro
+                                case 2 -> pNumero.setColor(Color.parseColor(getString(R.string.verde_oscuro)));
                                 case 3 -> pNumero.setColor(Color.RED);
-                                default -> pNumero.setColor(Color.parseColor("#000080")); // Azul oscuro
+                                default -> pNumero.setColor(Color.parseColor(getString(R.string.azul_oscuro)));
                             }
 
                             pNumero.setTextSize(anchoCasilla/2);
@@ -625,7 +637,26 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
 
     }
 
+    private String generarRelleno(int numFondo) {
+        //hora de aventuras, goku, goku shenlong, scoobydoo, rick y morty, joker,
+        // picoro y gohan, naruto, Kungfu Panda, ed edd y eddy, pokemon
+        String rellenos [] = {"#fbbd18", "#e4c584", "#e76a24", "#a7772b", "#40b5cb", "#421f1b",
+                "#37243a", "#e17439", "#fde9ae", "#a78a6c", "#ffd723"};
+         return rellenos[numFondo -1];
+    }
 
+    private String generarSombra(int numFondo) {
+        //hora de aventuras, goku, goku shenlong, scoobydoo, rick y morty, joker,
+        // picoro y gohan, naruto, Kungfu Panda, ed edd y eddy, pokemon
+
+        String sombras [] = {"#977f3e", "#5f5744", "#855a43", "#59401a", "#2d4f3e",
+                "#421f1b", "#37243a", "#934433", "#898272", "#5c5044", "#8f6e30"};
+
+        return sombras[numFondo -1];
+
+    }
+
+    //Liberar recursos
     @Override
     protected void onDestroy() {
         super.onDestroy();

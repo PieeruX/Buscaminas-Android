@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Buscaminas</string>
+    <string name="verde_oscuro">#008000</string>
+    <string name="azul_oscuro">#000080</string>
 </resources>

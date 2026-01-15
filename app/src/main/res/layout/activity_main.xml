@@ -23,8 +23,8 @@
         android:layout_width="350dp"
         android:layout_height="350dp"
         android:layout_marginStart="15dp"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="15dp"
-        android:layout_marginTop="25dp"
         android:background="@color/fondoTableroLinLayout"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
@@ -77,14 +77,14 @@
         android:paddingStart="10dp"
         android:paddingTop="5dp"
         android:paddingEnd="10dp"
+        android:visibility="gone"
         android:paddingBottom="5dp"
         android:textColor="@color/color_textoCronometro"
         android:textSize="30sp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/btnReiniciar"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/btnReiniciar"
         app:layout_constraintStart_toEndOf="@+id/btnReiniciar"
-        app:layout_constraintTop_toTopOf="@+id/btnReiniciar" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btnReiniciar"/>
 
     <TextView
         android:id="@+id/txtBombas"
@@ -96,27 +96,44 @@
         android:paddingTop="5dp"
         android:paddingEnd="10dp"
         android:paddingBottom="5dp"
+        android:layout_marginBottom="7dp"
         android:textSize="30sp"
         android:drawableStart="@drawable/bombaicono"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/btnReiniciar"
+        app:layout_constraintBottom_toTopOf="@id/txtCasillas"
         app:layout_constraintEnd_toStartOf="@+id/btnReiniciar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/btnReiniciar" />
+
+    <TextView
+        android:id="@+id/txtCasillas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/fondo_reloj"
+        android:fontFamily="@font/digit"
+        android:paddingStart="8dp"
+        android:paddingTop="5dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="5dp"
+        android:layout_marginBottom="40dp"
+        android:textSize="30sp"
+        android:drawableStart="@drawable/botoncasilla"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@+id/txtBombas"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnReiniciar"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/animacionConfeti"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-
         app:lottie_rawRes="@raw/confeti"
         app:lottie_autoPlay="false"
         app:lottie_loop="false"
-
         android:visibility="gone"
         android:elevation="20dp"
         android:layout_marginBottom="500dp"
-
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

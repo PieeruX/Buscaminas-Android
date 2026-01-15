@@ -40,6 +40,7 @@
         app:checkedButton="@+id/btnFacil"
         app:selectionRequired="true"
         app:singleSelection="true"
+        android:layout_marginTop="10dp"
         app:layout_constraintBottom_toTopOf="@+id/tgModoJuego"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

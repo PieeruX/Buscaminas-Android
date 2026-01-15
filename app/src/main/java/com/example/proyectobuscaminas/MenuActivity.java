@@ -5,6 +5,7 @@ import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -20,7 +21,7 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 public class MenuActivity extends AppCompatActivity {
     private Button btnJugar;
     private boolean silencio = false, modoJuegoClasico = true;
-    private int numeroBombas, sonidoClick;
+    private int numeroBombas, sonidoClick, numFilas = 8;
     private boolean yendoAlJuego;
 
     private MaterialButtonToggleGroup tgDificultad, tgModoJuego;
@@ -115,6 +116,7 @@ public class MenuActivity extends AppCompatActivity {
                 btnMedio.setTextSize(15);
                 btnDificil.setTextSize(15);
                 imgFondo.setImageResource(R.drawable.agallaspordefecto);
+                numFilas = 8;
 
                 if (!silencio) {
                     musica.stop();
@@ -138,6 +140,8 @@ public class MenuActivity extends AppCompatActivity {
                 imgFondo.setImageResource(R.drawable.agallasmedio);
                 btnFacil.setTextSize(15);
                 btnDificil.setTextSize(15);
+                numFilas = 10;
+
 
                 if (!silencio) {
                     musica.stop();
@@ -160,6 +164,7 @@ public class MenuActivity extends AppCompatActivity {
                 imgFondo.setImageResource(R.drawable.agallasdificil);
                 btnFacil.setTextSize(15);
                 btnMedio.setTextSize(15);
+                numFilas = 12;
 
 
                 if (!silencio) {
@@ -195,6 +200,7 @@ public class MenuActivity extends AppCompatActivity {
                 Intent intent = new Intent(MenuActivity.this, MainActivity.class);
                 intent.putExtra("CANTIDAD_BOMBAS", numeroBombas);
                 intent.putExtra("CLASICO", modoJuegoClasico);
+                intent.putExtra("NUM_FILAS", numFilas);
                 startActivity(intent);
             }
         });
