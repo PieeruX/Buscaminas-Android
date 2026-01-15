@@ -640,8 +640,8 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
     private String generarRelleno(int numFondo) {
         //hora de aventuras, goku, goku shenlong, scoobydoo, rick y morty, joker,
         // picoro y gohan, naruto, Kungfu Panda, ed edd y eddy, pokemon
-        String rellenos [] = {"#fbbd18", "#e4c584", "#e76a24", "#a7772b", "#40b5cb", "#421f1b",
-                "#37243a", "#e17439", "#fde9ae", "#a78a6c", "#ffd723"};
+        String rellenos [] = {"#fbbd18", "#e4c584", "#e76a24", "#a7772b", "#40b5cb", "#9f5a4a",
+                "#674465", "#e17439", "#fde9ae", "#a78a6c", "#ffd723"};
          return rellenos[numFondo -1];
     }
 
