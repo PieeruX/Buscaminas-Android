@@ -136,10 +136,12 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
 
                                 }else{
                                     soundPool.play(sonidoCasilla, 1, 1, 0, 0, 1);
-                                    if (casillas[f][c].banderita == true){
+
+                                    recorrer(f, c);
+
+                                    if (casillas[f][c].banderita){
                                         txtBombas.setText(" : " + (++numBanderitas));
                                     }
-                                    recorrer(f, c);
                                     if (contadorCasillas == ((NUM_COLUMNAS*numFilas) - numBombas)){
                                         winner();
 
@@ -170,7 +172,7 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
                                     soundPool.play(sonidoBanderita, 1, 1, 0, 0, 1);
                                     casillas[f][c].banderita = !casillas[f][c].banderita;
 
-                                    if (casillas[f][c].banderita == true){
+                                    if (casillas[f][c].banderita){
                                         txtBombas.setText(" : " + (--numBanderitas));
                                     }else{
                                         txtBombas.setText(" : " + (++numBanderitas));
@@ -488,6 +490,12 @@ public class MainActivity  extends AppCompatActivity implements View.OnTouchList
         if (fil >= 0 && fil < numFilas && col >= 0 && col < NUM_COLUMNAS){
             if (!casillas[fil][col].destapado){
                 casillas[fil][col].setDestapado(true);
+
+                if(casillas[fil][col].banderita){
+                    casillas[fil][col].banderita = false;
+                    numBanderitas++;
+                    txtBombas.setText(" : " + numBanderitas);
+                }
                 contadorCasillas++;
                 numCasillas--;
                 txtCasillas.setText(" : " + numCasillas);
